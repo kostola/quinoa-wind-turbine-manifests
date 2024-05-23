@@ -1,0 +1,9 @@
+apiVersion: package-operator.run/v1alpha1
+kind: Package
+metadata:
+  name: "{{.package.metadata.name}}-application"
+  annotations:
+    package-operator.run/phase: application-component
+spec:
+  image: {{ .package.image }}
+  component: application

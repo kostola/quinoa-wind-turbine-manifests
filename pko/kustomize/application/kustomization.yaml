@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- deployment.yaml
+- service.yaml
+- route.yaml
+images:
+- digest: sha256:a736dc12708becea0a98eda8ba8ff1a36fbcf807af7f342b6fed59e09bf03112
+  name: ghcr.io/kostola/quinoa-wind-turbine
+commonAnnotations:
+  package-operator.run/phase: application
+patches:
+- patch: |-
+    - op: add
+      path: "/spec/template/spec/containers/0/env/-"
+      value:
+        name: QUARKUS_SECURITY_USERS_EMBEDDED_USERS_ADMIN
+        value: db79c82ffa65c043ef641696a43fda532aca720c
+  target:
+    kind: Deployment
+    name: quinoa-wind-turbine

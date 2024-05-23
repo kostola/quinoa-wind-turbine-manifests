@@ -1,0 +1,11 @@
+﻿apiVersion: infinispan.org/v1
+kind: Infinispan
+metadata:
+  name: infinispan
+spec:
+  security:
+    endpointAuthentication: true
+    endpointEncryption:
+      type: None
+    endpointSecretName: infinispan-identities
+  replicas: 1

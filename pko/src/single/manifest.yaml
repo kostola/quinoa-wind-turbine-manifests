@@ -1,0 +1,42 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  name: quinoa-wind-turbine
+spec:
+  scopes:
+  - Namespaced
+  phases:
+  - name: kafka
+  - name: infinispan
+  - name: application
+  availabilityProbes:
+  - probes:
+    - condition:
+        type: Ready
+        status: "True"
+    selector:
+      kind:
+        group: kafka.strimzi.io
+        kind: Kafka
+  - probes:
+    - condition:
+        type: PreliminaryChecksPassed
+        status: "True"
+    - condition:
+        type: WellFormed
+        status: "True"
+    selector:
+      kind:
+        group: infinispan.org
+        kind: Infinispan
+  - probes:
+    - condition:
+        type: Available
+        status: "True"
+    - fieldsEqual:
+        fieldA: .status.updatedReplicas
+        fieldB: .status.replicas
+    selector:
+      kind:
+        group: apps
+        kind: Deployment

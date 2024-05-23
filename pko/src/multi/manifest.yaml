@@ -1,0 +1,21 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  name: quinoa-wind-turbine
+spec:
+  components: {}
+  scopes:
+    - Namespaced
+  phases:
+    - name: kafka-component
+    - name: infinispan-component
+    - name: application-component
+  availabilityProbes:
+    - probes:
+        - condition:
+            type: Available
+            status: "True"
+      selector:
+        kind:
+          group: package-operator.run
+          kind: Package

@@ -1,0 +1,191 @@
+apiVersion: v1
+data:
+  identities.yaml: Y3JlZGVudGlhbHM6Ci0gdXNlcm5hbWU6IGRldmVsb3BlcgogIHBhc3N3b3JkOiAwOWFpZGZrNG1yMzA5cnVzCg==
+kind: Secret
+metadata:
+  annotations:
+    package-operator.run/phase: infinispan
+  name: infinispan-identities
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftWebConsole
+    package-operator.run/phase: application
+  creationTimestamp: "2022-09-07T10:55:39Z"
+  labels:
+    app: quinoa-wind-turbine
+    app.kubernetes.io/component: quinoa-wind-turbine
+    app.kubernetes.io/instance: quinoa-wind-turbine
+    app.kubernetes.io/name: quinoa-wind-turbine
+    app.kubernetes.io/part-of: wind-turbine
+    app.openshift.io/runtime-version: 1.0.0
+  name: quinoa-wind-turbine
+spec:
+  internalTrafficPolicy: Cluster
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: 8443-tcp
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: quinoa-wind-turbine
+    deployment: quinoa-wind-turbine
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    alpha.image.policy.openshift.io/resolve-names: '*'
+    app.openshift.io/route-disabled: "false"
+    package-operator.run/phase: application
+  labels:
+    app: quinoa-wind-turbine
+    app.kubernetes.io/component: quinoa-wind-turbine
+    app.kubernetes.io/instance: quinoa-wind-turbine
+    app.kubernetes.io/name: quinoa-wind-turbine
+    app.kubernetes.io/part-of: wind-turbine
+    app.openshift.io/runtime: quarkus
+  name: quinoa-wind-turbine
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 5
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: quinoa-wind-turbine
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        package-operator.run/phase: application
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: quinoa-wind-turbine
+        deployment: quinoa-wind-turbine
+    spec:
+      containers:
+      - env:
+        - name: QUARKUS_PROFILE
+          value: openshift-cluster
+        - name: INFINISPAN_PASSWORD
+          value: 09aidfk4mr309rus
+        - name: QUARKUS_SECURITY_USERS_EMBEDDED_USERS_ADMIN
+          value: db79c82ffa65c043ef641696a43fda532aca720c
+        image: ghcr.io/kostola/quinoa-wind-turbine@sha256:a736dc12708becea0a98eda8ba8ff1a36fbcf807af7f342b6fed59e09bf03112
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        name: quinoa-wind-turbine
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: infinispan.org/v1
+kind: Infinispan
+metadata:
+  annotations:
+    package-operator.run/phase: infinispan
+  name: infinispan
+spec:
+  replicas: 1
+  security:
+    endpointAuthentication: true
+    endpointEncryption:
+      type: None
+    endpointSecretName: infinispan-identities
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  annotations:
+    package-operator.run/phase: kafka
+  name: my-cluster
+spec:
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+  kafka:
+    config:
+      default.replication.factor: 3
+      inter.broker.protocol.version: "3.5"
+      min.insync.replicas: 2
+      offsets.topic.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      transaction.state.log.replication.factor: 3
+    listeners:
+    - name: plain
+      port: 9092
+      tls: false
+      type: internal
+    - name: tls
+      port: 9093
+      tls: true
+      type: internal
+    replicas: 3
+    storage:
+      type: ephemeral
+    version: 3.5.0
+  zookeeper:
+    replicas: 3
+    storage:
+      type: ephemeral
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+    package-operator.run/phase: application
+  labels:
+    app: quinoa-wind-turbine
+    app.kubernetes.io/component: quinoa-wind-turbine
+    app.kubernetes.io/instance: quinoa-wind-turbine
+    app.kubernetes.io/name: quinoa-wind-turbine
+    app.kubernetes.io/part-of: wind-turbine
+    app.openshift.io/runtime-version: 1.0.0
+  name: quinoa-wind-turbine
+spec:
+  port:
+    targetPort: 8080-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: quinoa-wind-turbine
+    weight: 100
+  wildcardPolicy: None
