@@ -1,0 +1,6 @@
+apiVersion: package-operator.run/v1alpha1
+kind: Package
+metadata:
+  name: my-game
+spec:
+  image: quay.io/alcosta/quinoa-wind-turbine-package:multi

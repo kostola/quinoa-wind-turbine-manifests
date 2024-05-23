@@ -1,0 +1,21 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  name: infinispan
+spec:
+  scopes:
+  - Namespaced
+  phases:
+  - name: infinispan
+  availabilityProbes:
+  - probes:
+    - condition:
+        type: PreliminaryChecksPassed
+        status: "True"
+    - condition:
+        type: WellFormed
+        status: "True"
+    selector:
+      kind:
+        group: infinispan.org
+        kind: Infinispan
