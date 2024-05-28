@@ -1,35 +1,3 @@
-apiVersion: v1
-kind: Service
-metadata:
-  annotations:
-    openshift.io/generated-by: OpenShiftWebConsole
-    package-operator.run/phase: application
-  creationTimestamp: "2022-09-07T10:55:39Z"
-  labels:
-    app: quinoa-wind-turbine
-    app.kubernetes.io/component: quinoa-wind-turbine
-    app.kubernetes.io/instance: quinoa-wind-turbine
-    app.kubernetes.io/name: quinoa-wind-turbine
-    app.kubernetes.io/part-of: wind-turbine
-    app.openshift.io/runtime-version: 1.0.0
-  name: quinoa-wind-turbine
-spec:
-  internalTrafficPolicy: Cluster
-  ports:
-  - name: 8080-tcp
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
-  - name: 8443-tcp
-    port: 8443
-    protocol: TCP
-    targetPort: 8443
-  selector:
-    app: quinoa-wind-turbine
-    deployment: quinoa-wind-turbine
-  sessionAffinity: None
-  type: ClusterIP
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -104,29 +72,3 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  annotations:
-    openshift.io/host.generated: "true"
-    package-operator.run/phase: application
-  labels:
-    app: quinoa-wind-turbine
-    app.kubernetes.io/component: quinoa-wind-turbine
-    app.kubernetes.io/instance: quinoa-wind-turbine
-    app.kubernetes.io/name: quinoa-wind-turbine
-    app.kubernetes.io/part-of: wind-turbine
-    app.openshift.io/runtime-version: 1.0.0
-  name: quinoa-wind-turbine
-spec:
-  port:
-    targetPort: 8080-tcp
-  tls:
-    insecureEdgeTerminationPolicy: Redirect
-    termination: edge
-  to:
-    kind: Service
-    name: quinoa-wind-turbine
-    weight: 100
-  wildcardPolicy: None
