@@ -41,7 +41,7 @@ spec:
         - name: INFINISPAN_PASSWORD
           value: 09aidfk4mr309rus
         - name: QUARKUS_SECURITY_USERS_EMBEDDED_USERS_ADMIN
-          value: db79c82ffa65c043ef641696a43fda532aca720c
+          value: {{ .config.adminPassword }}
         image: ghcr.io/kostola/quinoa-wind-turbine@sha256:a736dc12708becea0a98eda8ba8ff1a36fbcf807af7f342b6fed59e09bf03112
         imagePullPolicy: IfNotPresent
         livenessProbe:

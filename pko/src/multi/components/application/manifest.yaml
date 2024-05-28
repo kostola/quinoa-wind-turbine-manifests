@@ -19,3 +19,11 @@ spec:
       kind:
         group: apps
         kind: Deployment
+  config:
+    openAPIV3Schema:
+      type: object
+      properties:
+        adminPassword:
+          type: string
+          description: "Hashed dashboard password for admin user"
+          default: 27e39ea189b5f9dc88ed0e73c86750191fa65049

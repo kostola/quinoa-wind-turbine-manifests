@@ -7,3 +7,5 @@ metadata:
 spec:
   image: {{ .package.image }}
   component: application
+  config:
+    adminPassword: {{ .config.adminPassword }}
